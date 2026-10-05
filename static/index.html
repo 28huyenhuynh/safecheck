@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SafeCheck · Kiểm tra tin nhắn lừa đảo</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --card: #ffffff; --ink: #1d1f24; --muted: #5d6270; --line: #e2e0d8;
+    --brand: #1f5f5b; --brand-ink: #ffffff;
+    --high: #b42318; --high-bg: #fdecea; --med: #9a6700; --med-bg: #fff4d6; --low: #1e7a46; --low-bg: #e6f4ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171b; --card: #1e2126; --ink: #eceef2; --muted: #a2a8b5; --line: #31353d;
+      --brand: #5fb3ab; --brand-ink: #0f1a19;
+      --high: #ff8a80; --high-bg: #3a1f1d; --med: #f0c35a; --med-bg: #362c14; --low: #6fd39b; --low-bg: #16301f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  label { font-weight: 600; display: block; margin-bottom: 8px; }
+  textarea { width: 100%; min-height: 140px; resize: vertical; padding: 12px; font: inherit; color: var(--ink);
+             background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  button { font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 18px; cursor: pointer;
+           border: 1px solid var(--brand); }
+  .primary { background: var(--brand); color: var(--brand-ink); }
+  .ghost { background: transparent; color: var(--brand); }
+  button:disabled { opacity: .6; cursor: wait; }
+  .examples { color: var(--muted); font-size: 14px; }
+  .examples button { padding: 4px 10px; font-size: 14px; font-weight: 500; }
+  #result { margin-top: 20px; }
+  .verdict { display: flex; gap: 16px; align-items: center; border-radius: 12px; padding: 16px 20px; }
+  .verdict.high { background: var(--high-bg); color: var(--high); }
+  .verdict.medium { background: var(--med-bg); color: var(--med); }
+  .verdict.low { background: var(--low-bg); color: var(--low); }
+  .score { font-size: 40px; font-weight: 700; line-height: 1; min-width: 72px; text-align: center; }
+  .score small { display: block; font-size: 12px; font-weight: 500; }
+  .verdict h2 { margin: 0 0 2px; font-size: 20px; }
+  .verdict p { margin: 0; color: var(--ink); }
+  h3 { font-size: 16px; margin: 20px 0 8px; }
+  ul.flags { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  ul.flags li { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--high);
+                border-radius: 8px; padding: 10px 14px; }
+  ul.flags strong { display: block; }
+  ul.flags span { color: var(--muted); font-size: 14px; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .tips { margin-top: 28px; color: var(--muted); font-size: 14px; }
+  .tips ul { padding-left: 20px; }
+  .error { color: var(--high); margin-top: 12px; }
+  .report { margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; }
+  .report h3 { margin-top: 0; }
+  .report ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  .report a { color: var(--brand); }
+  .rate { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 14px; color: var(--muted); }
+  .rate button { padding: 4px 12px; font-size: 14px; font-weight: 500; }
+  .survey { margin-top: 28px; }
+  .survey summary { cursor: pointer; font-weight: 600; color: var(--brand); }
+  .survey form { margin-top: 12px; display: grid; gap: 18px; }
+  .survey fieldset { border: 0; padding: 0; margin: 0; }
+  .survey legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+  .survey .opts { display: flex; gap: 6px 16px; flex-wrap: wrap; }
+  .survey .opts label { font-weight: 400; display: inline-flex; gap: 6px; align-items: center; margin: 0; }
+  .survey .hint { color: var(--muted); font-size: 13px; font-weight: 400; }
+  .survey textarea { min-height: 72px; }
+  .thanks { color: var(--low); font-weight: 600; }
+  .credit { margin-top: 24px; color: var(--muted); font-size: 12px; }
+  .credit a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>SafeCheck</h1>
+  <p class="sub">Dán tin nhắn hoặc đường link đáng ngờ để kiểm tra dấu hiệu lừa đảo. Tin nhắn không được lưu lại.</p>
+
+  <div class="card">
+    <label for="msg">Tin nhắn cần kiểm tra</label>
+    <textarea id="msg" placeholder="Ví dụ: Tài khoản của bạn đã bị khóa, vui lòng xác minh tại..."></textarea>
+    <div class="row">
+      <button class="primary" id="check">Kiểm tra</button>
+      <button class="ghost" id="clear">Xóa</button>
+    </div>
+    <div class="row examples">
+      Thử ví dụ:
+      <button class="ghost" data-ex="Tai khoan Vietcombank cua ban bi tam khoa. Xac minh ngay tai vietcombank-xacminh.top truoc 23h">Ngân hàng giả</button>
+      <button class="ghost" data-ex="Mẹ ơi con mất điện thoại, đây là số mới của con. Mẹ chuyển gấp 5 triệu vào tài khoản này nhé">Người thân giả</button>
+      <button class="ghost" data-ex="Mai 7h học lớp Cấu trúc dữ liệu ở phòng B203 nhé mọi người">Tin bình thường</button>
+    </div>
+    <p class="error" id="error" hidden></p>
+  </div>
+
+  <section id="result" hidden aria-live="polite"></section>
+
+  <div class="tips">
+    <strong>Luôn nhớ:</strong>
+    <ul>
+      <li>Không bao giờ cung cấp mã OTP, mật khẩu hay mã CVV cho bất kỳ ai.</li>
+      <li>Công an không làm việc hay yêu cầu chuyển tiền qua điện thoại.</li>
+      <li>Người thân xin tiền gấp? Gọi video hoặc gọi vào số cũ để xác minh.</li>
+      <li>Kết quả chỉ mang tính tham khảo. Khi nghi ngờ, đừng bấm link.</li>
+    </ul>
+  </div>
+
+  <details class="card survey" id="survey">
+    <summary>Góp ý cho SafeCheck (khoảng 2 phút)</summary>
+    <form id="survey-form">
+      <p class="hint">Hãy thử 2–3 tin nhắn trước khi trả lời. Đừng ghi số điện thoại, số tài khoản hay mã OTP vào đây.</p>
+      <fieldset>
+        <legend>1. Kết quả có đúng với suy nghĩ của bạn không? *</legend>
+        <div class="opts">
+          <label><input type="radio" name="accuracy" value="all" required> Đúng hết</label>
+          <label><input type="radio" name="accuracy" value="most"> Đúng phần lớn</label>
+          <label><input type="radio" name="accuracy" value="many_wrong"> Sai nhiều</label>
+          <label><input type="radio" name="accuracy" value="unsure"> Không chắc</label>
+        </div>
+      </fieldset>
+      <div>
+        <label for="wrong_example">2. Nếu có kết quả sai, tin nhắn đó nói về gì? <span class="hint">(tóm tắt, không bắt buộc)</span></label>
+        <textarea id="wrong_example" name="wrong_example" maxlength="500"></textarea>
+      </div>
+      <fieldset>
+        <legend>3. Phần giải thích dấu hiệu lừa đảo có dễ hiểu không? * <span class="hint">(1 = rất khó hiểu, 5 = rất dễ hiểu)</span></legend>
+        <div class="opts">
+          <label><input type="radio" name="clarity" value="1" required> 1</label>
+          <label><input type="radio" name="clarity" value="2"> 2</label>
+          <label><input type="radio" name="clarity" value="3"> 3</label>
+          <label><input type="radio" name="clarity" value="4"> 4</label>
+          <label><input type="radio" name="clarity" value="5"> 5</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>4. Bạn có biết thêm dấu hiệu lừa đảo nào mới không? *</legend>
+        <div class="opts">
+          <label><input type="radio" name="learned" value="yes" required> Có</label>
+          <label><input type="radio" name="learned" value="no"> Không</label>
+          <label><input type="radio" name="learned" value="unsure"> Không chắc</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>5. Trang web có dễ dùng không? * <span class="hint">(1 = rất khó, 5 = rất dễ)</span></legend>
+        <div class="opts">
+          <label><input type="radio" name="ease" value="1" required> 1</label>
+          <label><input type="radio" name="ease" value="2"> 2</label>
+          <label><input type="radio" name="ease" value="3"> 3</label>
+          <label><input type="radio" name="ease" value="4"> 4</label>
+          <label><input type="radio" name="ease" value="5"> 5</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>6. Bạn có giới thiệu SafeCheck cho người thân (bố mẹ, ông bà) không? *</legend>
+        <div class="opts">
+          <label><input type="radio" name="recommend" value="yes" required> Chắc chắn có</label>
+          <label><input type="radio" name="recommend" value="maybe"> Có thể</label>
+          <label><input type="radio" name="recommend" value="no"> Không</label>
+        </div>
+      </fieldset>
+      <div>
+        <label for="improve">7. Bạn muốn cải thiện điều gì nhất? <span class="hint">(không bắt buộc)</span></label>
+        <textarea id="improve" name="improve" maxlength="1000"></textarea>
+      </div>
+      <div class="row"><button class="primary" type="submit" id="survey-send">Gửi góp ý</button></div>
+      <p class="error" id="survey-error" hidden></p>
+    </form>
+  </details>
+
+  <p class="credit">Mô hình được huấn luyện một phần trên
+    <a href="https://github.com/trannguyenthaituan251209/vietnamese_sms_dataset" target="_blank" rel="noopener">Vietnamese SMS Dataset</a>
+    (Trần Nguyễn Thái Tuấn, Lê Hoàng Khang, Nguyễn Minh Tài, Nguyễn Văn Thắng, Mai Hoàng Đỉnh, 2026),
+    giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// What to do next, shown for "Đáng ngờ" and "Nguy cơ cao" results
+const REPORT = `
+  <div class="report">
+    <h3>Nên làm gì tiếp theo?</h3>
+    <ol>
+      <li><strong>Chụp màn hình tin nhắn</strong> làm bằng chứng trước khi xóa hoặc chặn.</li>
+      <li><strong>Đã bấm link, gửi OTP hoặc chuyển tiền?</strong> Gọi ngay tổng đài ngân hàng (số in ở mặt sau thẻ) để khóa thẻ, tài khoản và đổi mật khẩu.</li>
+      <li><strong>Báo cáo trang lừa đảo</strong> tại <a href="https://canhbao.khonggianmang.vn" target="_blank" rel="noopener">canhbao.khonggianmang.vn</a>.</li>
+      <li><strong>Kiểm tra một trang web</strong> có đáng tin không tại <a href="https://tinnhiemmang.vn" target="_blank" rel="noopener">tinnhiemmang.vn</a>.</li>
+      <li><strong>Phản ánh tin nhắn rác</strong> qua đầu số 5656, <strong>cuộc gọi rác</strong> qua 156.</li>
+      <li><strong>Đã mất tiền?</strong> Trình báo công an nơi gần nhất, mang theo ảnh chụp tin nhắn và sao kê ngân hàng.</li>
+    </ol>
+  </div>`;
+
+async function check() {
+  const text = $("msg").value.trim();
+  $("error").hidden = true;
+  if (!text) { $("error").textContent = "Vui lòng dán tin nhắn cần kiểm tra."; $("error").hidden = false; return; }
+  $("check").disabled = true; $("check").textContent = "Đang kiểm tra...";
+  try {
+    const res = await fetch("/api/check", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    render(await res.json());
+  } catch (e) {
+    $("error").textContent = "Không kiểm tra được (" + e.message + "). Máy chủ đã chạy chưa?";
+    $("error").hidden = false;
+  } finally {
+    $("check").disabled = false; $("check").textContent = "Kiểm tra";
+  }
+}
+
+function render(r) {
+  const flags = r.flags.length
+    ? `<h3>Dấu hiệu phát hiện được</h3><ul class="flags">${r.flags.map((f) =>
+        `<li><strong>${esc(f.title_vi)}</strong><span>${esc(f.advice_vi)}</span></li>`).join("")}</ul>`
+    : `<h3>Không phát hiện dấu hiệu cụ thể</h3>`;
+  $("result").innerHTML = `
+    <div class="verdict ${esc(r.level)}">
+      <div class="score">${r.score}<small>/100</small></div>
+      <div><h2>${esc(r.label_vi)}</h2><p>${esc(r.advice_vi)}</p></div>
+    </div>
+    ${flags}
+    <p class="meta">Mô hình AI: ${Math.round(r.ml_probability * 100)}% · Điểm quy tắc: ${r.rule_score}/100</p>
+    ${r.level === "low" ? "" : REPORT}
+    <div class="rate" id="rate">
+      Kết quả này có đúng không?
+      <button class="ghost" data-correct="yes">Đúng</button>
+      <button class="ghost" data-correct="no">Sai</button>
+      <button class="ghost" data-correct="unsure">Không chắc</button>
+    </div>`;
+  $("result").hidden = false;
+  // Only the verdict and score are sent, never the message
+  $("rate").querySelectorAll("button").forEach((b) => b.addEventListener("click", async () => {
+    const ok = await sendFeedback({ kind: "result", level: r.level, score: r.score, correct: b.dataset.correct });
+    $("rate").innerHTML = ok
+      ? `<span class="thanks">Cảm ơn bạn! Bạn có thể góp ý thêm ở cuối trang.</span>`
+      : `<span class="error">Chưa gửi được, bạn thử lại sau nhé.</span>`;
+  }));
+}
+
+async function sendFeedback(data) {
+  try {
+    const res = await fetch("/api/feedback", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+$("survey-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const data = { kind: "survey" };
+  for (const [k, v] of f.entries()) {
+    const val = String(v).trim();
+    if (val) data[k] = ["clarity", "ease"].includes(k) ? Number(val) : val;
+  }
+  $("survey-send").disabled = true;
+  $("survey-error").hidden = true;
+  if (await sendFeedback(data)) {
+    e.target.innerHTML = `<p class="thanks">Cảm ơn bạn đã góp ý cho SafeCheck!</p>`;
+  } else {
+    $("survey-error").textContent = "Chưa gửi được, bạn thử lại sau nhé.";
+    $("survey-error").hidden = false;
+    $("survey-send").disabled = false;
+  }
+});
+
+$("check").addEventListener("click", check);
+$("clear").addEventListener("click", () => { $("msg").value = ""; $("result").hidden = true; $("msg").focus(); });
+$("msg").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) check(); });
+document.querySelectorAll("[data-ex]").forEach((b) =>
+  b.addEventListener("click", () => { $("msg").value = b.dataset.ex; check(); }));
+</script>
+</body>
+</html>
