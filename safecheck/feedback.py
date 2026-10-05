@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 FIELDS = ["time", "kind", "level", "score", "correct",
-          "accuracy", "wrong_example", "clarity", "learned", "ease", "recommend", "improve"]
+          "accuracy", "wrong_example", "clarity", "would_use", "signs", "signs_other", "ideas"]
 CSV_PATH = Path(__file__).resolve().parent.parent / "data" / "feedback.csv"
 _lock = threading.Lock()
 

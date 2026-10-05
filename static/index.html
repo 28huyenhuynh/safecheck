@@ -70,6 +70,7 @@
   .survey .opts label { font-weight: 400; display: inline-flex; gap: 6px; align-items: center; margin: 0; }
   .survey .hint { color: var(--muted); font-size: 13px; font-weight: 400; }
   .survey textarea { min-height: 72px; }
+  .survey input[type=text] { flex: 1 1 220px; }
   .thanks { color: var(--low); font-weight: 600; }
   .credit { margin-top: 24px; color: var(--muted); font-size: 12px; }
   .credit a { color: inherit; }
@@ -103,8 +104,8 @@
     <ul>
       <li>Không bao giờ cung cấp mã OTP, mật khẩu hay mã CVV cho bất kỳ ai.</li>
       <li>Công an không làm việc hay yêu cầu chuyển tiền qua điện thoại.</li>
-      <li>Người thân xin tiền gấp? Gọi video hoặc gọi vào số cũ để xác minh.</li>
-      <li>Kết quả chỉ mang tính tham khảo. Khi nghi ngờ, đừng bấm link.</li>
+      <li>Nếu người thân hoặc bạn bè xin tiền gấp, hãy gọi video hoặc gọi vào số cũ để xác minh.</li>
+      <li>Kết quả chỉ mang tính tham khảo. Khi nghi ngờ, đừng bấm link các bạn nhé.</li>
     </ul>
   </div>
 
@@ -113,7 +114,7 @@
     <form id="survey-form">
       <p class="hint">Hãy thử 2–3 tin nhắn trước khi trả lời. Đừng ghi số điện thoại, số tài khoản hay mã OTP vào đây.</p>
       <fieldset>
-        <legend>1. Kết quả có đúng với suy nghĩ của bạn không? *</legend>
+        <legend>1. Kết quả có đúng với dự đoán/câu chuyện của bạn không? *</legend>
         <div class="opts">
           <label><input type="radio" name="accuracy" value="all" required> Đúng hết</label>
           <label><input type="radio" name="accuracy" value="most"> Đúng phần lớn</label>
@@ -122,11 +123,11 @@
         </div>
       </fieldset>
       <div>
-        <label for="wrong_example">2. Nếu có kết quả sai, tin nhắn đó nói về gì? <span class="hint">(tóm tắt, không bắt buộc)</span></label>
+        <label for="wrong_example">2. Nếu kết quả sai, bạn có thể tóm tắt ngắn gọn tin nhắn đó nói về gì không? <span class="hint">(Không bắt buộc)</span></label>
         <textarea id="wrong_example" name="wrong_example" maxlength="500"></textarea>
       </div>
       <fieldset>
-        <legend>3. Phần giải thích dấu hiệu lừa đảo có dễ hiểu không? * <span class="hint">(1 = rất khó hiểu, 5 = rất dễ hiểu)</span></legend>
+        <legend>3. Trên thang điểm từ 1-5, bạn đánh giá như thế nào về phần giải thích các dấu hiệu lừa đảo? * <span class="hint">(1 = Rất khó hiểu, 5 = Rất dễ hiểu)</span></legend>
         <div class="opts">
           <label><input type="radio" name="clarity" value="1" required> 1</label>
           <label><input type="radio" name="clarity" value="2"> 2</label>
@@ -136,41 +137,36 @@
         </div>
       </fieldset>
       <fieldset>
-        <legend>4. Bạn có biết thêm dấu hiệu lừa đảo nào mới không? *</legend>
+        <legend>4. Nếu chúng mình tạo một trang web để giúp người dùng nhận biết lừa đảo, cũng như kết nối các nạn nhân bị lừa đảo/đánh cắp tài khoản với các chuyên gia, bạn sẽ sử dụng trang web đó chứ? *</legend>
         <div class="opts">
-          <label><input type="radio" name="learned" value="yes" required> Có</label>
-          <label><input type="radio" name="learned" value="no"> Không</label>
-          <label><input type="radio" name="learned" value="unsure"> Không chắc</label>
+          <label><input type="radio" name="would_use" value="yes" required> Có</label>
+          <label><input type="radio" name="would_use" value="no"> Không</label>
+          <label><input type="radio" name="would_use" value="unsure"> Không chắc</label>
         </div>
       </fieldset>
       <fieldset>
-        <legend>5. Trang web có dễ dùng không? * <span class="hint">(1 = rất khó, 5 = rất dễ)</span></legend>
+        <legend>5. Bạn thường gặp phải những dấu hiệu lừa đảo nào? * <span class="hint">(chọn được nhiều)</span></legend>
         <div class="opts">
-          <label><input type="radio" name="ease" value="1" required> 1</label>
-          <label><input type="radio" name="ease" value="2"> 2</label>
-          <label><input type="radio" name="ease" value="3"> 3</label>
-          <label><input type="radio" name="ease" value="4"> 4</label>
-          <label><input type="radio" name="ease" value="5"> 5</label>
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>6. Bạn có giới thiệu SafeCheck cho người thân (bố mẹ, ông bà) không? *</legend>
-        <div class="opts">
-          <label><input type="radio" name="recommend" value="yes" required> Chắc chắn có</label>
-          <label><input type="radio" name="recommend" value="maybe"> Có thể</label>
-          <label><input type="radio" name="recommend" value="no"> Không</label>
+          <label><input type="checkbox" name="signs" value="impersonation"> Giả danh công an, ngân hàng, cơ quan nhà nước</label>
+          <label><input type="checkbox" name="signs" value="otp"> Đòi mã OTP, mật khẩu, số thẻ</label>
+          <label><input type="checkbox" name="signs" value="link"> Gửi link lạ, trang web giả mạo</label>
+          <label><input type="checkbox" name="signs" value="prize"> Báo trúng thưởng, quà tặng bất ngờ</label>
+          <label><input type="checkbox" name="signs" value="job_invest"> Việc nhẹ lương cao, đầu tư lãi khủng</label>
+          <label><input type="checkbox" name="signs" value="urgent_money"> Người quen nhờ chuyển tiền gấp</label>
+          <label><input type="checkbox" name="signs" value="other" id="signs-other-check"> Khác:</label>
+          <input type="text" id="signs_other" name="signs_other" maxlength="200" placeholder="Dấu hiệu khác bạn từng gặp">
         </div>
       </fieldset>
       <div>
-        <label for="improve">7. Bạn muốn cải thiện điều gì nhất? <span class="hint">(không bắt buộc)</span></label>
-        <textarea id="improve" name="improve" maxlength="1000"></textarea>
+        <label for="ideas">6. Bạn có thêm ý tưởng gì để phòng chống lừa đảo không? <span class="hint">(không bắt buộc)</span></label>
+        <textarea id="ideas" name="ideas" maxlength="1000"></textarea>
       </div>
       <div class="row"><button class="primary" type="submit" id="survey-send">Gửi góp ý</button></div>
       <p class="error" id="survey-error" hidden></p>
     </form>
   </details>
 
-  <p class="credit">SafeCheck do Huyen Huynh phát triển. Mô hình được huấn luyện một phần trên
+  <p class="credit">Huyen Huynh. Mô hình được huấn luyện một phần trên
     <a href="https://github.com/trannguyenthaituan251209/vietnamese_sms_dataset" target="_blank" rel="noopener">Vietnamese SMS Dataset</a>,
     giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
 </main>
@@ -258,10 +254,17 @@ $("survey-form").addEventListener("submit", async (e) => {
   const data = { kind: "survey" };
   for (const [k, v] of f.entries()) {
     const val = String(v).trim();
-    if (val) data[k] = ["clarity", "ease"].includes(k) ? Number(val) : val;
+    if (!val) continue;
+    if (k === "signs") data.signs = data.signs ? `${data.signs}, ${val}` : val;
+    else data[k] = k === "clarity" ? Number(val) : val;
+  }
+  $("survey-error").hidden = true;
+  if (!data.signs && !data.signs_other) {
+    $("survey-error").textContent = "Vui lòng chọn ít nhất một dấu hiệu ở câu 5.";
+    $("survey-error").hidden = false;
+    return;
   }
   $("survey-send").disabled = true;
-  $("survey-error").hidden = true;
   if (await sendFeedback(data)) {
     e.target.innerHTML = `<p class="thanks">Cảm ơn bạn đã góp ý cho SafeCheck!</p>`;
   } else {
@@ -270,6 +273,9 @@ $("survey-form").addEventListener("submit", async (e) => {
     $("survey-send").disabled = false;
   }
 });
+
+// Typing in "Khác" ticks its box
+$("signs_other").addEventListener("input", (e) => { $("signs-other-check").checked = e.target.value.trim() !== ""; });
 
 $("check").addEventListener("click", check);
 $("clear").addEventListener("click", () => { $("msg").value = ""; $("result").hidden = true; $("msg").focus(); });

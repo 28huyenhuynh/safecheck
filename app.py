@@ -44,10 +44,10 @@ class FeedbackRequest(BaseModel):
     accuracy: Optional[Literal["all", "most", "many_wrong", "unsure"]] = None
     wrong_example: Optional[str] = Field(None, max_length=500)
     clarity: Rating = Field(None, ge=1, le=5)
-    learned: Optional[Literal["yes", "no", "unsure"]] = None
-    ease: Rating = Field(None, ge=1, le=5)
-    recommend: Optional[Literal["yes", "maybe", "no"]] = None
-    improve: Optional[str] = Field(None, max_length=1000)
+    would_use: Optional[Literal["yes", "no", "unsure"]] = None
+    signs: Optional[str] = Field(None, max_length=200)
+    signs_other: Optional[str] = Field(None, max_length=200)
+    ideas: Optional[str] = Field(None, max_length=1000)
 
 
 @app.post("/api/feedback")

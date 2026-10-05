@@ -39,14 +39,14 @@ The `Dockerfile` installs everything, retrains the model, runs the tests and sta
 
 ## User feedback
 
-Under every result, users can answer "Kết quả này có đúng không?" (only the verdict and score are saved, never the message). At the bottom of the page, a short survey (*Góp ý cho SafeCheck*) asks about accuracy, clarity of the explanations, ease of use and whether they'd recommend it.
+Under every result, users can answer "Kết quả này có đúng không?" (only the verdict and score are saved, never the message). At the bottom of the page, a short survey (*Góp ý cho SafeCheck*) asks about accuracy, clarity of the explanations, whether they'd use a site connecting scam victims with experts, which scam signs they run into most, and their own ideas for fighting scams.
 
 - **On your computer**, answers are added to `data/feedback.csv`.
 - **Online**, free hosts erase files on restart, so send answers to a Google Sheet instead:
   1. Create a Google Sheet, then *Extensions → Apps Script*, and paste:
      ```js
      const FIELDS = ["time","kind","level","score","correct","accuracy","wrong_example",
-                     "clarity","learned","ease","recommend","improve"];
+                     "clarity","would_use","signs","signs_other","ideas"];
      function doPost(e) {
        const sheet = SpreadsheetApp.getActiveSheet();
        if (sheet.getLastRow() === 0) sheet.appendRow(FIELDS);
